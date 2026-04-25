@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EduControl</title>
+<link rel="icon" href="https://control-e-del.github.io/denetim/logo3.png">
+<link rel="apple-touch-icon" href="https://control-e-del.github.io/denetim/logo3.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EduControl">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f7f4;
+  --card:#ffffff;
+  --card2:#f5faf8;
+  --border:#d4e8df;
+  --text:#1a2e25;
+  --muted:#5a7a6a;
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --green-light:#dcfce7;
+  --green-mid:#bbf7d0;
+  --blue:#2563eb;
+  --blue-light:#eff6ff;
+  --orange:#d97706;
+  --orange-light:#fffbeb;
+  --red:#dc2626;
+  --red-light:#fef2f2;
+  --accent:#10b981;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}
+/* Force light backgrounds everywhere */
+* { color: inherit; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;background:#e8f5ee;}
+body{height:100%;overflow:hidden;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25;display:flex;flex-direction:column;max-width:430px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,0.12);}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--card);border-bottom:2px solid var(--green-mid);box-shadow:var(--shadow);flex-shrink:0;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.topbar-logo{width:34px;height:34px;border-radius:9px;object-fit:contain;background:#f0f7f4;padding:2px;}
+.topbar-title{font-size:1.05rem;font-weight:800;color:var(--text);}
+.topbar-title span{color:var(--green);}
+.topbar-sub{font-size:0.62rem;color:var(--muted);font-weight:600;letter-spacing:1px;}
+.topbar-btn{width:36px;height:36px;border-radius:10px;background:var(--green-light);border:1px solid var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;}
+
+/* ── SCROLL ── */
+.scroll-area{flex:1;overflow-y:auto;padding:14px 14px 80px;-webkit-overflow-scrolling:touch;background:#f0f7f4;}
+.scroll-area::-webkit-scrollbar{width:4px;}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-top:2px solid var(--green-mid);display:flex;padding:6px 0 10px;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,0.06);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 0;}
+.nav-icon{font-size:1.2rem;}
+.nav-label{font-size:0.6rem;font-weight:700;color:var(--muted);}
+.nav-btn.active .nav-label{color:var(--green);}
+.nav-btn.active .nav-icon{filter:drop-shadow(0 0 3px rgba(22,163,74,0.4));}
+.add-fab{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--green-dark),var(--green));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;box-shadow:0 4px 12px rgba(22,163,74,0.35);margin-top:-10px;transition:transform 0.2s;}
+.add-fab:active{transform:scale(0.92);}
+
+/* ── PANELS ── */
+.panel{display:none;background:#f0f7f4;}
+.panel.active{display:block;background:#f0f7f4;}
+
+/* ── GREETING ── */
+.greeting{margin-bottom:16px;}
+.greeting h2{font-size:1.1rem;font-weight:800;color:#1a2e25;}
+.greeting p{font-size:0.73rem;color:#5a7a6a;margin-top:2px;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);animation:fadeUp 0.35s ease both;}
+.stat-card:nth-child(1){animation-delay:0.05s;} .stat-card:nth-child(2){animation-delay:0.1s;}
+.stat-card:nth-child(3){animation-delay:0.15s;} .stat-card:nth-child(4){animation-delay:0.2s;}
+.stat-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;margin-bottom:9px;}
+.sc-green .stat-icon{background:var(--green-light);} .sc-blue .stat-icon{background:var(--blue-light);}
+.sc-orange .stat-icon{background:var(--orange-light);} .sc-red .stat-icon{background:var(--red-light);}
+.stat-value{font-size:1.7rem;font-weight:900;line-height:1;margin-bottom:2px;}
+.sc-green .stat-value{color:var(--green);} .sc-blue .stat-value{color:var(--blue);}
+.sc-orange .stat-value{color:var(--orange);} .sc-red .stat-value{color:var(--red);}
+.stat-label{font-size:0.7rem;color:var(--muted);font-weight:600;}
+.stat-sub{font-size:0.63rem;color:var(--muted);opacity:0.7;margin-top:1px;}
+
+/* ── SEC HDR ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.sec-hdr h3{font-size:0.85rem;font-weight:800;color:#1a2e25;}
+.sec-hdr a{font-size:0.7rem;color:var(--green);font-weight:700;cursor:pointer;}
+
+/* ── LIST ITEMS ── */
+.list-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.k-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:11px 13px;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow);transition:transform 0.15s;}
+.k-item:active{transform:scale(0.98);}
+.k-ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--green-light);}
+.k-info{flex:1;}
+.k-name{font-size:0.82rem;font-weight:700;color:var(--text);}
+.k-time{font-size:0.67rem;color:var(--muted);margin-top:1px;}
+.badge{font-size:0.64rem;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+.b-ok{background:var(--green-light);color:var(--green);}
+.b-warn{background:var(--orange-light);color:var(--orange);}
+.b-err{background:var(--red-light);color:var(--red);}
+
+.a-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:11px 13px;display:flex;align-items:flex-start;gap:9px;box-shadow:var(--shadow);}
+.a-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.a-dot.high{background:var(--red);} .a-dot.mid{background:var(--orange);} .a-dot.low{background:var(--green);}
+.a-info{flex:1;}
+.a-title{font-size:0.82rem;font-weight:700;color:var(--text);}
+.a-desc{font-size:0.7rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+.a-meta{font-size:0.64rem;color:var(--muted);margin-top:3px;}
+.a-status{font-size:0.62rem;font-weight:800;padding:3px 8px;border-radius:999px;background:var(--red-light);color:var(--red);white-space:nowrap;}
+.a-status.kapali{background:var(--green-light);color:var(--green);}
+.a-status.bekliyor{background:#fef3c7;color:#b45309;}
+
+/* ── HAYIR BOX ── */
+.hayir-box{background:var(--red-light);border:1px solid #fecaca;border-radius:13px;padding:13px;margin-bottom:16px;}
+.hayir-box h4{font-size:0.8rem;font-weight:800;color:var(--red);margin-bottom:9px;}
+.h-item{font-size:0.73rem;padding:4px 0;border-bottom:1px solid #fecaca;line-height:1.4;color:var(--text);}
+.h-item:last-child{border-bottom:none;}
+.h-aciklama{font-size:0.67rem;color:var(--red);margin-top:1px;}
+
+/* ── LOADING/EMPTY ── */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;padding:24px;gap:9px;}
+.spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:0.73rem;color:var(--muted);font-weight:600;}
+.empty-wrap{text-align:center;padding:20px;color:#5a7a6a;font-size:0.78rem;font-weight:600;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow);}
+.prog-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-top span{font-size:0.72rem;color:var(--muted);font-weight:700;}
+.prog-pct{font-size:0.88rem;font-weight:800;color:var(--green);}
+.prog-bg{height:8px;background:var(--bg);border-radius:999px;overflow:hidden;border:1px solid var(--border);}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--green-dark),var(--green));border-radius:999px;transition:width 0.4s cubic-bezier(.4,1.4,.6,1);}
+
+/* ── FORM TABS ── */
+.form-tabs{display:flex;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:14px;gap:4px;}
+.form-tab{flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+.form-tab.active{background:var(--green-light);color:var(--green);}
+
+/* ── Q SECTION ── */
+.q-section{margin-bottom:10px;border-radius:13px;overflow:hidden;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);}
+.q-sec-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;background:var(--card2);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.q-sec-title{font-size:0.72rem;font-weight:800;color:var(--green);flex:1;text-transform:uppercase;letter-spacing:1px;}
+.q-sec-score{font-size:0.7rem;font-weight:800;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:999px;}
+.q-sec-score.full{color:var(--green);background:var(--green-light);}
+.chevron{font-size:0.8rem;color:var(--muted);transition:transform 0.3s;}
+.q-section.collapsed .chevron{transform:rotate(-90deg);}
+.q-section.collapsed .q-sec-body{display:none;}
+.q-row{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.q-row:last-child{border-bottom:none;}
+.q-row:hover{background:var(--card2);}
+.q-row.ans-yes{border-left:3px solid var(--green);}
+.q-row.ans-no{border-left:3px solid var(--red);}
+.q-num{font-size:0.65rem;font-weight:900;color:var(--muted);min-width:18px;text-align:right;}
+.q-text{flex:1;font-size:0.82rem;font-weight:600;line-height:1.45;color:var(--text);}
+.tgl-grp{display:flex;gap:4px;}
+.btn-e,.btn-h{padding:4px 10px;border-radius:7px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:0.7rem;cursor:pointer;transition:all 0.18s;background:transparent;color:var(--muted);}
+.btn-e:hover{border-color:var(--green);color:var(--green);}
+.btn-h:hover{border-color:var(--red);color:var(--red);}
+.btn-e.active{background:var(--green);border-color:var(--green);color:#fff;}
+.btn-h.active{background:var(--red);border-color:var(--red);color:#fff;}
+.reason-wrap{display:none;padding:8px 14px 10px 38px;background:var(--red-light);border-bottom:1px solid #fecaca;}
+.reason-wrap.show{display:block;animation:fadeUp 0.2s ease;}
+.reason-lbl{font-size:0.65rem;font-weight:800;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.reason-ta{width:100%;background:#fff;border:1.5px solid #fecaca;border-radius:8px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.8rem;font-weight:600;padding:7px 10px;resize:vertical;min-height:58px;outline:none;}
+.reason-ta:focus{border-color:var(--red);}
+
+/* ── SUBMIT ── */
+.submit-wrap{padding:14px 0 6px;text-align:center;}
+.btn-submit{background:linear-gradient(135deg,var(--green-dark),var(--green));color:#fff;border:none;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.88rem;font-weight:800;padding:13px 28px;cursor:pointer;box-shadow:0 4px 12px rgba(22,163,74,0.3);transition:all 0.2s;width:100%;}
+.btn-submit:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-ariza-submit{background:linear-gradient(135deg,#b45309,var(--orange))!important;box-shadow:0 4px 12px rgba(245,158,11,0.3)!important;}
+
+/* ── ARIZA FORM ── */
+.ariza-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow);}
+.af-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px;}
+.af-input,.af-select{flex:1;min-width:130px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:600;padding:9px 12px;outline:none;transition:border-color 0.2s;}
+.af-input::placeholder{color:var(--muted);}
+.af-input:focus,.af-select:focus{border-color:var(--green);}
+.af-select option{background:#fff;}
+.af-ta{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:600;padding:9px 12px;resize:vertical;min-height:70px;outline:none;margin-bottom:10px;}
+.af-ta:focus{border-color:var(--green);}
+.af-add{background:linear-gradient(135deg,#b45309,var(--orange));color:#fff;border:none;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:0.82rem;padding:9px 16px;cursor:pointer;}
+
+/* ── MODAL ── */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;}
+.modal-ov.show{display:flex;}
+.modal{background:#fff;border:2px solid var(--green-mid);border-radius:18px;padding:28px 22px;text-align:center;max-width:290px;width:90%;box-shadow:var(--shadow-md);animation:popIn 0.35s cubic-bezier(.4,1.4,.6,1);}
+@keyframes popIn{from{transform:scale(0.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal .big{font-size:2.8rem;margin-bottom:7px;}
+.modal h2{font-size:0.95rem;font-weight:800;color:var(--green);margin-bottom:4px;}
+.modal p{font-size:0.78rem;color:var(--muted);margin-bottom:12px;}
+.modal-score{font-size:1.8rem;font-weight:900;color:var(--text);margin-bottom:12px;}
+.modal-score span{color:var(--green);}
+.modal-btn{background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:0.88rem;padding:10px 22px;cursor:pointer;width:100%;}
+
+/* ── ŞİFRE ── */
+.pass-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:998;align-items:center;justify-content:center;}
+.pass-ov.show{display:flex;}
+.pass-box{background:#fff;border:2px solid var(--green-mid);border-radius:18px;padding:26px 22px;text-align:center;max-width:280px;width:90%;box-shadow:var(--shadow-md);animation:popIn 0.3s cubic-bezier(.4,1.4,.6,1);}
+.pass-box h3{font-size:0.88rem;font-weight:800;color:var(--green);letter-spacing:0.5px;margin-bottom:5px;}
+.pass-box p{font-size:0.73rem;color:var(--muted);margin-bottom:14px;}
+.pass-inp{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;font-weight:800;padding:10px 14px;outline:none;text-align:center;letter-spacing:4px;transition:border-color 0.2s;}
+.pass-inp:focus{border-color:var(--green);}
+.pass-inp.wrong{border-color:var(--red);animation:shake 0.35s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+.pass-err{font-size:0.7rem;color:var(--red);margin-top:6px;min-height:16px;font-weight:700;}
+.pass-btn{margin-top:11px;width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:0.88rem;padding:10px;cursor:pointer;}
+.pass-cancel{margin-top:5px;width:100%;background:transparent;color:var(--muted);border:none;font-size:0.73rem;cursor:pointer;padding:5px;}
+
+/* ── PROFIL ── */
+.prof-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="https://control-e-del.github.io/denetim/logo3.png" class="topbar-logo" alt="logo">
+    <div>
+      <div class="topbar-title">Edu<span>Control</span></div>
+      <div class="topbar-sub">DOĞA KOLEJİ · ANTEP</div>
+    </div>
+  </div>
+  <div class="topbar-btn" onclick="yenile()" title="Yenile">🔄</div>
+</div>
+
+<div class="scroll-area" id="scroll-area">
+
+  <!-- PANO -->
+  <div class="panel" id="panel-pano">
+    <div class="greeting"><h2>Kontrol Panosu 📊</h2><p id="bugun-text">Yükleniyor...</p></div>
+    <div class="stats-grid">
+      <div class="stat-card sc-green"><div class="stat-icon">📋</div><div class="stat-value" id="s-toplam">—</div><div class="stat-label">Toplam Kayıt</div><div class="stat-sub">Bu hafta</div></div>
+      <div class="stat-card sc-blue"><div class="stat-icon">✅</div><div class="stat-value" id="s-evet">—</div><div class="stat-label">Evet Oranı</div><div class="stat-sub" id="s-pct">—</div></div>
+      <div class="stat-card sc-orange"><div class="stat-icon">⏳</div><div class="stat-value" id="s-ariza">—</div><div class="stat-label">Açık Arıza</div><div class="stat-sub">Bekliyor</div></div>
+      <div class="stat-card sc-red"><div class="stat-icon">⚠️</div><div class="stat-value" id="s-acil">—</div><div class="stat-label">Acil</div><div class="stat-sub">Müdahale gerekli</div></div>
+    </div>
+    <div class="sec-hdr"><h3>Son Kontroller</h3><a onclick="switchPanel('kontroller')">Tümü →</a></div>
+    <div class="list-wrap" id="son-kontroller"><div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Yükleniyor...</div></div></div>
+    <div id="hayir-ozet-wrap" style="display:none;">
+      <div class="sec-hdr"><h3>❌ Bugünkü Sorunlar</h3></div>
+      <div class="hayir-box" id="hayir-ozet"></div>
+    </div>
+    <div class="sec-hdr"><h3>🔨 Açık Arızalar</h3><a onclick="switchPanel('ariza')">Tümü →</a></div>
+    <div class="list-wrap" id="son-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- KONTROLLER -->
+  <div class="panel" id="panel-kontroller">
+    <div class="greeting"><h2>Tüm Kontroller 📋</h2><p id="kontrol-text">Yükleniyor...</p></div>
+    <div class="list-wrap" id="tum-kontroller"><div class="loading-wrap"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- FORMLAR -->
+  <div class="panel" id="panel-formlar">
+    <div class="greeting"><h2 id="form-title">Denetim Formu 📝</h2><p id="form-sub">Form seçildi</p></div>
+    <div class="prog-wrap">
+      <div class="prog-top"><span id="prog-text">0 / 0 Soru</span><span class="prog-pct" id="prog-pct">%0</span></div>
+      <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="form-tabs" id="form-tabs-wrap" style="display:none;">
+      <button class="form-tab active" id="ftab-onburo" onclick="switchFormTab('onburo')">🏢 Ön Büro</button>
+      <button class="form-tab" id="ftab-danisma" onclick="switchFormTab('danisma')">🗂️ Danışma</button>
+    </div>
+    <div id="form-content-area"></div>
+    <div class="submit-wrap">
+      <button class="btn-submit" id="btn-next" onclick="nextTab()" style="background:linear-gradient(135deg,#0369a1,#2563eb);">Sonraki →</button>
+      <button class="btn-submit" id="btn-form-submit" disabled onclick="submitForm()" style="display:none;">✅ Formu Kaydet</button>
+    </div>
+  </div>
+
+  <!-- ARIZA -->
+  <div class="panel active" id="panel-ariza">
+    <div class="greeting"><h2>Arıza Kaydı 🔨</h2><p>Öğretmen / Personel Bildirimi</p></div>
+    <div class="ariza-form">
+      <div class="af-row">
+        <input class="af-input" id="a-sinif" placeholder="Sınıf / Konum (örn: 3-A)"/>
+        <input class="af-input" id="a-bildiren" placeholder="Bildiren Kişi"/>
+      </div>
+      <div class="af-row">
+        <select class="af-select" id="a-oncelik"><option value="" disabled selected>Öncelik</option><option value="yuksek">🔴 Yüksek – Acil</option><option value="orta">🟡 Orta – Bugün</option><option value="dusuk">🟢 Düşük</option></select>
+        <select class="af-select" id="a-tur"><option value="" disabled selected>Arıza Türü</option><option>🪟 Cam / Pencere</option><option>🚪 Kapı / Kilit</option><option>💡 Elektrik / Aydınlatma</option><option>🚰 Su / Tesisat</option><option>🪑 Mobilya / Ekipman</option><option>📺 Akıllı Tahta</option><option>❄️ Isıtma / Soğutma</option><option>🧹 Temizlik</option><option>📋 Diğer</option></select>
+      </div>
+      <textarea class="af-ta" id="a-aciklama" placeholder="Arızayı detaylıca açıklayınız..."></textarea>
+      <button class="af-add" onclick="addAriza()">➕ Arıza Kaydı Ekle</button>
+    </div>
+    <div class="list-wrap" id="ariza-list-local"><div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div></div>
+    <div class="submit-wrap">
+      <button class="btn-submit btn-ariza-submit" onclick="submitAriza()">📤 Arıza Kayıtlarını Gönder</button>
+    </div>
+    <div class="sec-hdr"><h3>📋 Tüm Arıza Geçmişi</h3></div>
+    <div class="list-wrap" id="tum-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- PROFİL -->
+  <div class="panel" id="panel-profil">
+    <div class="greeting"><h2>Profil 👤</h2></div>
+    <div class="prof-card">
+      <div style="text-align:center;margin-bottom:14px;">
+        <img src="https://control-e-del.github.io/denetim/logo3.png" style="width:70px;height:70px;border-radius:14px;background:var(--bg);padding:4px;object-fit:contain;">
+        <div style="font-size:1rem;font-weight:800;margin-top:9px;color:var(--text);">EduControl</div>
+        <div style="font-size:0.72rem;color:var(--muted);">Kontrol Sende · Güven Heryerde</div>
+        <div style="font-size:0.68rem;color:var(--green);margin-top:3px;font-weight:700;">Doğa Koleji · Antep</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;"><span style="color:var(--muted);">Versiyon</span><span style="font-weight:700;">v2.0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;"><span style="color:var(--muted);">Geliştirici</span><span style="font-weight:700;">Enver Sağlam</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.78rem;"><span style="color:var(--muted);">Sistem</span><span style="font-weight:700;color:var(--green);">● Aktif</span></div>
+      </div>
+    </div>
+    <div style="font-size:0.68rem;color:var(--muted);text-align:center;padding:10px 0;">CREATED BY ✦ ESY YAZILIM</div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn" id="nav-pano" onclick="goPanel('pano','admin')"><span class="nav-icon">🏠</span><span class="nav-label">Pano</span></button>
+  <button class="nav-btn" id="nav-kontroller" onclick="goPanel('kontroller','admin')"><span class="nav-icon">📊</span><span class="nav-label">Kontroller</span></button>
+  <button class="add-fab" onclick="goPanel('formlar','form')">➕</button>
+  <button class="nav-btn active" id="nav-ariza" onclick="goPanel('ariza','free')"><span class="nav-icon">🔨</span><span class="nav-label">Arıza</span></button>
+  <button class="nav-btn" id="nav-profil" onclick="goPanel('profil','free')"><span class="nav-icon">👤</span><span class="nav-label">Profil</span></button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal-ov">
+  <div class="modal">
+    <div class="big">✅</div>
+    <h2>Kaydedildi!</h2>
+    <p id="modal-msg">Form başarıyla gönderildi.</p>
+    <div class="modal-score" id="modal-score"></div>
+    <button class="modal-btn" onclick="document.getElementById('modal-ov').classList.remove('show')">Tamam</button>
+  </div>
+</div>
+
+<!-- ŞİFRE -->
+<div class="pass-ov" id="pass-ov">
+  <div class="pass-box">
+    <h3 id="pass-title">🔒 GİRİŞ ŞİFRESİ</h3>
+    <p id="pass-desc">Şifrenizi giriniz.</p>
+    <input class="pass-inp" type="password" id="pass-inp" placeholder="••••••••" maxlength="20"/>
+    <div class="pass-err" id="pass-err"></div>
+    <button class="pass-btn" onclick="checkPass()">Giriş Yap</button>
+    <button class="pass-cancel" onclick="cancelPass()">İptal</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0XqxTQpbCjaJauS2e1hz5FtJKfkOxz2BKXCgTdwJz_pblFOywIpnq79L11rtmlJJrmQ/exec";
+
+// ── ŞİFRELER & ROL ───────────────────────────────────────────
+// buro321   → Ön Büro + Danışma formları
+// personel321 → Güvenlik, Temizlik, Teknik, Bahçe formları
+// admin321  → Her şey (pano, kontroller, tüm formlar)
+var ROLES = {
+  'buro321':      'buro',
+  'personel321':  'personel',
+  'admin321':     'admin'
+};
+var currentRole = null; // null = misafir (sadece arıza)
+var pendingPanel = null;
+var pendingType  = null;
+var currentFormTab = null;
+
+// Form bölümleri
+var BURO_TABS = ['onburo','danisma'];
+var PERSONEL_TABS = ['guvenlik','temizlik','teknik','bahce'];
+var ALL_FORM_TABS = ['onburo','danisma','guvenlik','temizlik','teknik','bahce'];
+
+// ── PANEL GEÇİŞ ──────────────────────────────────────────────
+function goPanel(panel, type) {
+  if (type === 'free') { activatePanel(panel); return; }
+  if (type === 'admin') {
+    if (currentRole === 'admin' || currentRole === 'buro' || currentRole === 'personel') {
+      activatePanel(panel);
+      if (panel === 'pano' || panel === 'kontroller') veriCek();
+      return;
+    }
+  }
+  if (type === 'form') {
+    if (currentRole === 'admin' || currentRole === 'buro' || currentRole === 'personel') {
+      activatePanel(panel);
+      setupFormForRole();
+      return;
+    }
+  }
+  // Şifre iste
+  pendingPanel = panel;
+  pendingType  = type;
+  document.getElementById('pass-title').textContent = '🔒 Giriş Şifresi';
+  document.getElementById('pass-desc').textContent = 'Bu bölüme erişmek için şifrenizi giriniz.';
+  document.getElementById('pass-inp').value = '';
+  document.getElementById('pass-err').textContent = '';
+  document.getElementById('pass-inp').classList.remove('wrong');
+  document.getElementById('pass-ov').classList.add('show');
+  setTimeout(function(){ document.getElementById('pass-inp').focus(); }, 150);
+}
+
+function activatePanel(panel) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('panel-'+panel).classList.add('active');
+  var nb = document.getElementById('nav-'+panel);
+  if (nb) nb.classList.add('active');
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+function switchPanel(p) { goPanel(p, p==='ariza'||p==='profil'?'free':'admin'); }
+
+function checkPass() {
+  var input = document.getElementById('pass-inp').value.trim();
+  var role = ROLES[input];
+  if (role) {
+    currentRole = role;
+    document.getElementById('pass-ov').classList.remove('show');
+    if (pendingType === 'form') {
+      activatePanel(pendingPanel);
+      setupFormForRole();
+    } else if (pendingType === 'admin') {
+      if (role === 'admin') { activatePanel(pendingPanel); veriCek(); }
+      else {
+        document.getElementById('pass-err').textContent = '❌ Bu bölüm için admin şifresi gerekli.';
+        document.getElementById('pass-ov').classList.add('show');
+        return;
+      }
+    }
+    pendingPanel = null; pendingType = null;
+  } else {
+    document.getElementById('pass-inp').classList.add('wrong');
+    document.getElementById('pass-err').textContent = '❌ Hatalı şifre!';
+    document.getElementById('pass-inp').value = '';
+    setTimeout(function(){ document.getElementById('pass-inp').classList.remove('wrong'); }, 400);
+  }
+}
+
+function cancelPass() {
+  document.getElementById('pass-ov').classList.remove('show');
+  pendingPanel = null; pendingType = null;
+}
+
+document.addEventListener('keydown', function(e){
+  if (e.key==='Enter' && document.getElementById('pass-ov').classList.contains('show')) checkPass();
+});
+
+// ── FORM KURULUM ─────────────────────────────────────────────
+function setupFormForRole() {
+  var tabs, firstTab, showTabs;
+  if (currentRole === 'admin') {
+    tabs = ALL_FORM_TABS; firstTab = 'onburo'; showTabs = true;
+    document.getElementById('form-title').textContent = 'Denetim Formları 📝';
+    document.getElementById('form-sub').textContent = 'Tüm formlar';
+  } else if (currentRole === 'buro') {
+    tabs = BURO_TABS; firstTab = 'onburo'; showTabs = true;
+    document.getElementById('form-title').textContent = 'Ön Büro Formu 🏢';
+    document.getElementById('form-sub').textContent = 'Ön Büro & Danışma';
+  } else {
+    tabs = PERSONEL_TABS; firstTab = 'guvenlik'; showTabs = true;
+    document.getElementById('form-title').textContent = 'Personel Formu 👥';
+    document.getElementById('form-sub').textContent = 'Personel Denetimi';
+  }
+
+  // Tab butonlarını oluştur
+  var tabsWrap = document.getElementById('form-tabs-wrap');
+  if (showTabs && tabs.length > 1) {
+    tabsWrap.style.display = 'flex';
+    tabsWrap.innerHTML = tabs.map(function(t){
+      var icons = {onburo:'🏢',danisma:'🗂️',guvenlik:'🛡️',temizlik:'🧹',teknik:'🔧',bahce:'🌳'};
+      var labels = {onburo:'Ön Büro',danisma:'Danışma',guvenlik:'Güvenlik',temizlik:'Temizlik',teknik:'Teknik',bahce:'Bahçe'};
+      return '<button class="form-tab" id="ftab-'+t+'" onclick="switchFormTab(\''+t+'\')">'+icons[t]+' '+labels[t]+'</button>';
+    }).join('');
+  } else { tabsWrap.style.display = 'none'; }
+
+  // İçeriği oluştur
+  var area = document.getElementById('form-content-area');
+  area.innerHTML = '';
+  tabs.forEach(function(t){
+    var wrap = document.createElement('div');
+    wrap.id = 'fc-'+t;
+    wrap.style.display = 'none';
+    buildFormSections(SECTIONS[t], wrap, t);
+    area.appendChild(wrap);
+  });
+
+  switchFormTab(firstTab);
+}
+
+function switchFormTab(tab) {
+  currentFormTab = tab;
+  document.querySelectorAll('[id^="ftab-"]').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('[id^="fc-"]').forEach(function(w){ w.style.display='none'; });
+  var tb = document.getElementById('ftab-'+tab);
+  if (tb) tb.classList.add('active');
+  var fc = document.getElementById('fc-'+tab);
+  if (fc) fc.style.display = 'block';
+  updateProgress();
+}
+
+// ── SORU VERİLERİ ────────────────────────────────────────────
+var SECTIONS = {
+  onburo: { title:"ÖN BÜRO", icon:"🏢", questions:["Personel üniforma talimatlarına uygun mu?","Personel odaları gezilip uygunluk ve tertip düzen incelendi mi?","Odalardan / alanlardan istek ve talepler yok mu?","Odalar arası diyalog kontrol altında mı?","Gelen yazılar takip ediliyor mu?","Özlük işleri tam işliyor mu?","Revirde ilaç eksiği yok mu?","Mola ve yemek saatlerine uyuluyor mu?","Tasarım ve grafik sosyal medya paylaşımları iyi mi?","Veli gezdirme rink alanları incelendi mi?","CRM'e bakıldı mı?","Kayıt görüşme evrakları düzenli mi? Yönetmenden alındı mı?","Kayıt linkine gelen bildirimlere bakıldı ve aranıp randevular oluşturuldu mu?","Doğum günü ve özel gün paylaşımı hazırlandı mı?","Geçmiş datalara bakılıp aranması ve takip edilmesi gereken kayıtlar incelendi mi?","Okulda birimlerin özel bir etkinliği veya çalışması var mı? Müdürlere soruldu mu?","Etkinlik takvimi incelendi ve programa uyuluyor mu?","Drive'daki kayıt formlarına değişiklikler işlendi mi?","Kıyafet satış alanı düzenli mi?","Eksik kıyafetler merkezden isteniyor mu?","Fotokopi için izin formları isteniyor mu?","İş sağlığı ve güvenliği tedbiri alınmış mı?"] },
+  danisma: { title:"DANIŞMA PERSONELİ", icon:"🗂️", questions:["Personel kılık kıyafeti uygun ve temiz mi?","Görev deski tertipli ve düzenli mi?","Personel görevi esnasında duyarlı ve dikkatli mi?","Personel şikayeti var mı? Sıralı Amirlerini tanıyor mu?","Ön lobi temiz mi? Tvler açık mı? Kupalıklar temiz mi?","Personel gelenlere karşı güler yüzlü ve kurumda saygıda kusur etmiyor mu?","Giriş çıkış saatleri müdürlere atıldı mı?","Kartı olmayan öğrencilerin siparişi verildi mi?","Drive'daki kayıt formlarına değişiklikler işlendi mi?","İş sağlığı ve güvenliği tedbiri alınmış mı?","Talep formları imzalı biçimde genel müdüre sunuluyor mu?","Talep formları ile ilgili en az üç yerden fiyat alınmış mı?","Ödemesi yapılan talep formlarına notlar alınıp tekrar ödeme yapılmaması sağlanıyor mu?"] },
+  guvenlik: { title:"GÜVENLİK PERSONELİ", icon:"🛡️", questions:["Güvenlik forması temiz ve uygun mu?","Dedektör, X-ray, turnike alanı temiz ve çalışıyor mu?","Veli kaydı deftere işlenip alınıp içeri bilgi verildikten sonra danışmaya kadar eşlik ediliyor mu?","Bekleme alanının temizliği ve tertibi konusunda hassas mı?","Dışarıya öğrenciyi izinsiz çıkarmıyor mu?","Ön taraf araç trafiğini kontrol edip düzenliyor mu?","İçeri giren araçlara refakat ediliyor mu?","Güvenlik önü ve çıkışının temizliği, camlar vs. tamam mı?","Kurslara kalan öğrencilerin isimleri müdürlüklerden alınıp kontrollü giriş çıkış sağlandı mı?","Spor kurs liste ve saatleri alınıp listeler üzerinden giriş çıkış sağlandı mı?","Çıkıştan sonra lobi ve idari odalar kilitlendi mi?","Akşam rinkler atılıyor mu?","Giriş kartı olmayan öğrencilerin isimleri danışma ve müdürlüğüne bildiriliyor mu?","Kameralar bilgisayarda açık şekilde gözlem yapılıyor mu?","Gelen kargolar düzenli biçimde zamanında danışmaya ve sahibine iletiliyor mu?","İş sağlığı ve güvenliği tedbiri alınmış mı?"] },
+  temizlik: { title:"TEMİZLİK PERSONELİ", icon:"🧹", questions:["Personel üniforması talimatlara uygun mu? Tam mı?","Tutulması gereken dosya / dafter / talimat vb. tutuluyor mu?","Ekipman eksiği var mı?","Ekibin sorumlu olduğu alanlar gezildi mi? Temizlik alanları denetlendi mi?","Ekibin sorumluluk alanları ile ilgili görülen aksaklık var mı? Uyarıldı ve eksik giderildi mi?","Personel şikayeti yok mu?","Personel Sıralı Amirlerini tanıyor mu?","Personel aksaklıkları ve arızaları aktarıyor mu?","Kampüs içerisinde planlanan iş programı var mı? Görevlendirme yapılıyor mu?","Kimyasal / MSDS / Ürün bilgi formları var mı? Bu ürünler güvenli yerde mi?","Kimyasal ve sarf malzemeleri güvenli alanda, öğrencinin ulaşamayacağı yerde tutuluyor mu?","Makinalar çalışıyor ve düzenli yerde mi?","Sınıf camları ve akıllı tahtaların tozu alındı mı?","Sınıf cam kilitleri kontrol edilmiş mi?","Sınıf sıraları silinmiş ve temizlenmiş mi?","Sınıflardaki kırık ve arızalar için arıza kaydı açılmış mı?","Tuvalet sabunluk ve peçete tedariki yapılmış mı?","Tenefüslerden sonra tuvaletlerde lavabolar, çöp kutuları, peçetelik ve sabunlar kontrol ediliyor mu?","Tenefüs aralarında sınıf havalandırıldı, çöpler kontrol edilip koridor ve sınıftaki kaba pislikler alındı mı?","Gün sonu tüm sınıfların temizliği tamamlanıp ışık, klima ve akıllı tahtalar kapatıldı mı?","Kayıp ve bulunanlar için bir alan oluşturulup bulunanlar oraya bırakıldı mı?","Kantin alanı temiz ve masalar düzenli mi?","Kantin fiyatları güncel ve panoda yazıyor mu?","Yemekhane temiz, musluklar sağlam ve peçeteler takılı mı?","İki birim arası yemekhane temizleniyor mu?","Depolara giriş çıkış düzenli ve sayımı yapılıp envanter çizelgesi var mı?","İş sağlığı ve güvenliği tedbiri alınmış mı?"] },
+  teknik: { title:"TEKNİK PERSONEL", icon:"🔧", questions:["Personel üniforması talimatlara uygun mu? Tam mı?","Personelin sorumlu olduğu alanlar gezildi mi? Bütün alanlar denetlendi mi?","Personelin sorumluluk alanları ile ilgili görülen aksaklık var mı?","Tesisin kritik noktaları biliniyor mu?","Kampüs içerisinde oluşan arızaları zamanında müdahale ediliyor mu?","Personel kullanması gereken ekipman ve malzeme yeterli mi?","Kampüs içerisinde arıza durumunda görev ve sorumluluklarını biliyor mu?","Arıza anında İSG kurallarına uygun çalışıyor mu?","Açılan arıza kayıtlarına dönüş sağlanmış ve takibi yapılmış mı?","Çalışmayan sistemler hakkında ilgililere bilgi verildi mi?","Reji düzenli mi?","Kamera sistemleri çalışıyor ve doğru alanı gösteriyor mu?","Çalışmayan ve arızalı sistemler ile ilgili bilgiyi amirine veriyor ve takibini yapıyor mu?","Akıllı tahta güvenliği, temizliği ve bakımını yapıyor mu?","Bilgisayarların bakımı ve arızalarını gideriyor mu?","İnternet problemlerine anında cevap veriyor mu?","Teknik malzemeyi düzenli ve alanında saklıyor mu?","Zimmet çizelgesi yapıldı ve kontrolü sağlanıyor mu?","İş sağlığı ve güvenliği tedbiri alınmış mı?"] },
+  bahce: { title:"BAHÇE PERSONELİ", icon:"🌳", questions:["Hayvan yemleri verildi mi?","Bahçe alanlarında deşilmesi ve ekilmesi gereken yerler deşilip ekildi mi?","Veteriner gerektiren bir durum oluşmadı mı?","Ağaçlar budanıp sulama yapıldı mı?","Hayvanların alanı temizlendi mi?","Hayvanların bulunduğu kafesler kontrollü ve güvenli mi?","İş sağlığı ve güvenliği tedbiri alınmış mı?"] }
+};
+
+var formState = {};
+
+function buildFormSections(sec, container, tabKey) {
+  if (!sec) return;
+  var secDiv = document.createElement('div');
+  secDiv.className = 'q-section';
+
+  var hdr = document.createElement('div');
+  hdr.className = 'q-sec-hdr';
+  hdr.innerHTML = '<span style="font-size:1rem">'+sec.icon+'</span><span class="q-sec-title">'+sec.title+'</span><span class="q-sec-score" id="qsc-'+tabKey+'">0/'+sec.questions.length+'</span><span class="chevron">▾</span>';
+  hdr.addEventListener('click', function(){ secDiv.classList.toggle('collapsed'); });
+
+  var body = document.createElement('div');
+  body.className = 'q-sec-body';
+
+  sec.questions.forEach(function(q, qi) {
+    var key = tabKey+'-'+qi;
+    formState[key] = null;
+
+    var row = document.createElement('div');
+    row.className = 'q-row';
+    row.id = 'qr-'+key;
+    row.innerHTML = '<span class="q-num">'+(qi+1)+'</span><span class="q-text">'+q+'</span><div class="tgl-grp"><button class="btn-e" data-key="'+key+'" data-val="true">EVET</button><button class="btn-h" data-key="'+key+'" data-val="false">HAYIR</button></div>';
+
+    var rw = document.createElement('div');
+    rw.className = 'reason-wrap';
+    rw.id = 'rw-'+key;
+    rw.innerHTML = '<div class="reason-lbl">⚠️ Sorunun Nedeni</div><textarea class="reason-ta" id="rt-'+key+'" placeholder="Nedeni yazınız..."></textarea>';
+
+    body.appendChild(row);
+    body.appendChild(rw);
+  });
+
+  secDiv.appendChild(hdr);
+  secDiv.appendChild(body);
+  container.appendChild(secDiv);
+
+  container.addEventListener('click', function(e){
+    var btn = e.target.closest('.btn-e,.btn-h');
+    if (!btn) return;
+    setAns(btn.dataset.key, btn.dataset.val==='true', tabKey);
+  });
+}
+
+function setAns(key, val, tabKey) {
+  formState[key] = val;
+  var row = document.getElementById('qr-'+key);
+  row.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+  row.querySelector(val?'.btn-e':'.btn-h').classList.add('active');
+  row.classList.remove('ans-yes','ans-no');
+  row.classList.add(val?'ans-yes':'ans-no');
+  var rw = document.getElementById('rw-'+key);
+  if (!val) { rw.classList.add('show'); document.getElementById('rt-'+key).focus(); }
+  else { rw.classList.remove('show'); document.getElementById('rt-'+key).value=''; }
+
+  var sec = SECTIONS[tabKey];
+  var ans = sec.questions.filter(function(_,qi){ return formState[tabKey+'-'+qi]!==null; }).length;
+  var el = document.getElementById('qsc-'+tabKey);
+  if (el) { el.textContent=ans+'/'+sec.questions.length; el.classList.toggle('full',ans===sec.questions.length); }
+  updateProgress();
+}
+
+function updateProgress() {
+  if (!currentFormTab) return;
+  var tabs = currentRole==='admin'?ALL_FORM_TABS:currentRole==='buro'?BURO_TABS:PERSONEL_TABS;
+  var total=0,ans=0;
+  tabs.forEach(function(t){
+    var sec=SECTIONS[t];
+    sec.questions.forEach(function(_,qi){ total++; if(formState[t+'-'+qi]!==null) ans++; });
+  });
+  var pct = total>0?Math.round((ans/total)*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent='%'+pct;
+  document.getElementById('prog-text').textContent=ans+' / '+total+' Soru';
+
+  // Mevcut sekmenin tüm soruları cevaplanmış mı?
+  var curSec = SECTIONS[currentFormTab];
+  var curDone = curSec.questions.every(function(_,qi){ return formState[currentFormTab+'-'+qi]!==null; });
+
+  // Son sekme mi?
+  var isLast = currentRole==='admin' || isLastTab();
+
+  var nextBtn = document.getElementById('btn-next');
+  var submitBtn = document.getElementById('btn-form-submit');
+
+  if (isLast) {
+    // Son sekmede: submit göster, next gizle
+    nextBtn.style.display = 'none';
+    submitBtn.style.display = 'block';
+    // Tüm sekmelerin tamamlanmış olması lazım (admin hariç)
+    if (currentRole === 'admin') {
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = (ans < total);
+    }
+  } else {
+    // Son sekme değil: next göster, submit gizle
+    nextBtn.style.display = 'block';
+    submitBtn.style.display = 'none';
+    // Next butonu sadece mevcut sekme tamamsa aktif
+    nextBtn.disabled = !curDone;
+    nextBtn.style.opacity = curDone ? '1' : '0.4';
+    nextBtn.style.cursor = curDone ? 'pointer' : 'not-allowed';
+  }
+}
+
+function isLastTab() {
+  var tabs = currentRole==='buro'?BURO_TABS:PERSONEL_TABS;
+  return tabs[tabs.length-1] === currentFormTab;
+}
+
+function nextTab() {
+  var tabs = currentRole==='buro'?BURO_TABS:PERSONEL_TABS;
+  var idx = tabs.indexOf(currentFormTab);
+  if (idx < tabs.length-1) {
+    switchFormTab(tabs[idx+1]);
+    document.getElementById('scroll-area').scrollTop = 0;
+  }
+}
+
+async function submitForm() {
+  var btn = document.getElementById('btn-form-submit');
+  btn.disabled=true; btn.textContent='⏳ Kaydediliyor...';
+  var now=new Date();
+  var tarih=now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var saat=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  var tabs=currentRole==='admin'?ALL_FORM_TABS:currentRole==='buro'?BURO_TABS:PERSONEL_TABS;
+  var sekme=currentRole==='buro'?'Ön Büro & Danışma':'Personel Denetimi';
+  var sorular=[];
+  tabs.forEach(function(t){
+    var sec=SECTIONS[t];
+    sec.questions.forEach(function(q,qi){
+      var key=t+'-'+qi;
+      var ta=document.getElementById('rt-'+key);
+      sorular.push({bolum:sec.title,soru:q,cevap:formState[key]===true?'EVET':'HAYIR',aciklama:ta?ta.value:''});
+    });
+  });
+  var payload={tarih,saat,kampus:'Antep Doğa Koleji',sekme,sorular,arizalar:[]};
+  try {
+    var form=new FormData(); form.append('data',JSON.stringify(payload));
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:form});
+    var yes=sorular.filter(function(s){return s.cevap==='EVET';}).length;
+    var pct=Math.round((yes/sorular.length)*100);
+    document.getElementById('modal-msg').textContent=sekme+' formu kaydedildi.';
+    document.getElementById('modal-score').innerHTML='<span>%'+pct+'</span> Evet';
+    document.getElementById('modal-ov').classList.add('show');
+  } catch(e){ alert('Bağlantı hatası!'); }
+  btn.disabled=false; btn.textContent='✅ Formu Kaydet';
+}
+
+// ── ARIZA ────────────────────────────────────────────────────
+var arizaList=[];
+var arizaCounter=0;
+
+function addAriza(){
+  var sinif=document.getElementById('a-sinif').value.trim();
+  var bildiren=document.getElementById('a-bildiren').value.trim();
+  var oncelik=document.getElementById('a-oncelik').value;
+  var tur=document.getElementById('a-tur').value;
+  var aciklama=document.getElementById('a-aciklama').value.trim();
+  if(!sinif||!aciklama||!oncelik||!tur){alert('Lütfen tüm alanları doldurunuz.');return;}
+  var id=++arizaCounter;
+  var now=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  arizaList.push({id,sinif,bildiren,oncelik,tur,aciklama,saat:now});
+  var em=document.getElementById('ariza-empty-local');
+  if(em) em.style.display='none';
+  var dc=oncelik==='yuksek'?'high':oncelik==='orta'?'mid':'low';
+  var bl=oncelik==='yuksek'?'🔴 ACİL':oncelik==='orta'?'🟡 ORTA':'🟢 DÜŞÜK';
+  var item=document.createElement('div');
+  item.className='a-item'; item.id='ali-'+id;
+  item.innerHTML='<div class="a-dot '+dc+'"></div><div class="a-info"><div class="a-title">'+tur+' — '+sinif+'</div><div class="a-desc">'+aciklama+'</div><div class="a-meta">'+bl+(bildiren?' · '+bildiren:'')+'</div></div><button style="background:none;border:none;color:var(--muted);cursor:pointer;" onclick="delAriza('+id+')">✕</button>';
+  document.getElementById('ariza-list-local').appendChild(item);
+  ['a-sinif','a-bildiren','a-aciklama'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('a-oncelik').selectedIndex=0;
+  document.getElementById('a-tur').selectedIndex=0;
+}
+
+function delAriza(id){
+  var el=document.getElementById('ali-'+id);
+  if(el) el.remove();
+  arizaList=arizaList.filter(function(a){return a.id!==id;});
+  if(!arizaList.length) document.getElementById('ariza-list-local').innerHTML='<div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div>';
+}
+
+async function submitAriza(){
+  if(!arizaList.length){alert('Önce arıza ekleyiniz!');return;}
+  var now=new Date();
+  var tarih=now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var saat=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  var payload={tarih,saat,kampus:'Antep Doğa Koleji',sekme:'Arıza Kayıtları',sorular:[],arizalar:arizaList};
+  try{
+    var form=new FormData(); form.append('data',JSON.stringify(payload));
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:form});
+    document.getElementById('modal-msg').textContent=arizaList.length+' arıza kaydı gönderildi.';
+    document.getElementById('modal-score').innerHTML='<span>'+arizaList.length+'</span> Kayıt';
+    document.getElementById('modal-ov').classList.add('show');
+    arizaList=[];
+    document.getElementById('ariza-list-local').innerHTML='<div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div>';
+    veriCek();
+  }catch(e){alert('Bağlantı hatası!');}
+}
+
+// ── VERİ ─────────────────────────────────────────────────────
+var tumKontroller=[];
+var tumArizalar=[];
+
+async function veriCek(){
+  try{
+    var resp=await fetch(SCRIPT_URL+'?tip=dashboard&t='+Date.now());
+    var json=await resp.json();
+    tumKontroller=json.kontroller||[];
+    tumArizalar=json.arizalar||[];
+  }catch(e){ tumArizalar=[]; tumKontroller=[]; }
+  renderPano(); renderKontroller(); renderArizaPanel();
+}
+
+function bugunStr(){ return new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+function kItem(k){
+  var tot=(k.evetSayisi||0)+(k.hayirSayisi||0);
+  var kp=tot>0?Math.round(((k.evetSayisi||0)/tot)*100):0;
+  var badge=k.hayirSayisi>0?'<span class="badge b-warn">⚠️ '+k.hayirSayisi+' Sorun</span>':'<span class="badge b-ok">✅ Tamam</span>';
+  var ico=k.bolum.indexOf('Büro')>-1||k.bolum.indexOf('Buro')>-1?'🏢':k.bolum.indexOf('Güvenlik')>-1?'🛡️':k.bolum.indexOf('Temizlik')>-1?'🧹':k.bolum.indexOf('Teknik')>-1?'🔧':k.bolum.indexOf('Bahçe')>-1?'🌳':'📋';
+  return '<div class="k-item"><div class="k-ico">'+ico+'</div><div class="k-info"><div class="k-name">'+k.bolum+'</div><div class="k-time">'+k.tarih+' · '+k.saat+' · %'+kp+'</div></div>'+badge+'</div>';
+}
+
+function aItem(a){
+  var dc=a.oncelik==='yuksek'?'high':a.oncelik==='orta'?'mid':'low';
+  var durum = a.durum||'Açık';
+  var sc = durum==='Tamamlandı'?'kapali':durum==='Bekliyor'?'bekliyor':'';
+  var oncelikYazi = a.oncelik==='yuksek'?'🔴 Acil':a.oncelik==='orta'?'🟡 Orta':'🟢 Düşük';
+  return '<div class="a-item"><div class="a-dot '+dc+'"></div><div class="a-info"><div class="a-title">'+a.tur+' — '+a.sinif+'</div><div class="a-desc">'+a.aciklama+'</div><div class="a-meta">'+a.tarih+' · '+(a.bildiren||'-')+' · '+oncelikYazi+'</div></div><div class="a-status '+sc+'">'+durum+'</div></div>';
+}
+
+function renderPano(){
+  document.getElementById('bugun-text').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+  var totEvet=tumKontroller.reduce(function(a,k){return a+(k.evetSayisi||0);},0);
+  var totSoru=tumKontroller.reduce(function(a,k){return a+(k.evetSayisi||0)+(k.hayirSayisi||0);},0);
+  var pct=totSoru>0?Math.round((totEvet/totSoru)*100):0;
+  var acik=tumArizalar.filter(function(a){return a.durum!=='Kapalı';}).length;
+  var acil=tumArizalar.filter(function(a){return a.oncelik==='yuksek'&&a.durum!=='Kapalı';}).length;
+  document.getElementById('s-toplam').textContent=tumKontroller.length;
+  document.getElementById('s-evet').textContent='%'+pct;
+  document.getElementById('s-pct').textContent=totEvet+' Evet';
+  document.getElementById('s-ariza').textContent=acik;
+  document.getElementById('s-acil').textContent=acil;
+  var sonlar=tumKontroller.slice(-3).reverse();
+  document.getElementById('son-kontroller').innerHTML=sonlar.length===0?'<div class="empty-wrap">📭 Henüz kayıt yok</div>':sonlar.map(kItem).join('');
+  var tumH=[];
+  tumKontroller.forEach(function(k){if(k.hayirlar)k.hayirlar.forEach(function(h){tumH.push(h);});});
+  var hw=document.getElementById('hayir-ozet-wrap');
+  if(tumH.length>0){
+    hw.style.display='block';
+    document.getElementById('hayir-ozet').innerHTML='<h4>❌ '+tumH.length+' Sorun</h4>'+tumH.map(function(h){return '<div class="h-item">• '+h.soru+(h.aciklama?'<div class="h-aciklama">→ '+h.aciklama+'</div>':'')+' </div>';}).join('');
+  } else { hw.style.display='none'; }
+  var sa=tumArizalar.filter(function(a){return a.durum!=='Kapalı';}).slice(-3).reverse();
+  document.getElementById('son-arizalar').innerHTML=sa.length===0?'<div class="empty-wrap">✅ Açık arıza yok</div>':sa.map(aItem).join('');
+}
+
+function renderKontroller(){
+  var el=document.getElementById('tum-kontroller');
+  document.getElementById('kontrol-text').textContent=tumKontroller.length+' kayıt';
+  el.innerHTML=tumKontroller.length===0?'<div class="empty-wrap">📭 Henüz kayıt yok</div>':tumKontroller.slice().reverse().map(kItem).join('');
+}
+
+function renderArizaPanel(){
+  var el=document.getElementById('tum-arizalar');
+  el.innerHTML=tumArizalar.length===0?'<div class="empty-wrap">✅ Arıza kaydı yok</div>':tumArizalar.slice().reverse().map(aItem).join('');
+}
+
+function yenile(){ veriCek(); }
+
+// ── INIT ─────────────────────────────────────────────────────
+veriCek();
+</script>
+</body>
+</html>
