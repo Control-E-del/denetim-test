@@ -729,20 +729,20 @@ async function gonderAriza() {
 
   try {
     if (fotoBase64) {
-      // Fotoğrafı küçült sonra GET ile gönder
-      var kucuk = await kucultFoto(fotoBase64, fotoMimeType);
+      // Fotoğraflı - tüm bilgileri FOTO_URL'ye POST ile gönder (test sayfasındaki gibi)
       var payload = {
         tip: 'ariza_foto',
         tarih: tarih, saat: saat,
         sinif: sinif, bildiren: bildiren,
         tur: tur, aciklama: aciklama,
         oncelik: oncelik,
-        foto: kucuk, fotoMime: 'image/jpeg'
+        foto: fotoBase64, fotoMime: fotoMimeType || 'image/jpeg'
       };
-      var encoded = encodeURIComponent(JSON.stringify(payload));
-      await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
+      var form = new FormData();
+      form.append('data', JSON.stringify(payload));
+      await fetch(FOTO_URL, {method:'POST', mode:'no-cors', body:form});
     } else {
-      // Fotoğrafsız - GET ile gönder
+      // Fotoğrafsız - GET ile ana script'e gönder
       var payload2 = {
         tarih:tarih, saat:saat, kampus:'Antep Doga Koleji',
         sekme:'Ariza Kayitlari', sorular:[],
