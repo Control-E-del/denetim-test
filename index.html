@@ -176,6 +176,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
 .btn-submit:disabled{opacity:0.4;cursor:not-allowed;}
 .btn-ariza-submit{background:linear-gradient(135deg,#b45309,var(--orange))!important;box-shadow:0 4px 12px rgba(245,158,11,0.3)!important;}
 
+/* ── FOTO ZONE ── */
+.foto-zone{border:2px dashed var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);margin-bottom:2px;}
+.foto-zone:hover{border-color:var(--green);background:var(--green-light);}
+.foto-zone.has-foto{border-color:var(--green);border-style:solid;background:var(--green-light);}
+.foto-zone #foto-placeholder{font-size:0.82rem;color:var(--muted);font-weight:600;}
+.foto-zone #foto-placeholder span{color:var(--green);font-weight:700;}
+
 /* ── ARIZA FORM ── */
 .ariza-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow);}
 .af-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px;}
@@ -293,6 +300,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
         <select class="af-select" id="a-tur"><option value="" disabled selected>Arıza Türü</option><option>🪟 Cam / Pencere</option><option>🚪 Kapı / Kilit</option><option>💡 Elektrik / Aydınlatma</option><option>🚰 Su / Tesisat</option><option>🪑 Mobilya / Ekipman</option><option>📺 Akıllı Tahta</option><option>❄️ Isıtma / Soğutma</option><option>🧹 Temizlik</option><option>📋 Diğer</option></select>
       </div>
       <textarea class="af-ta" id="a-aciklama" placeholder="Arızayı detaylıca açıklayınız..."></textarea>
+      
+      <!-- FOTOĞRAF -->
+      <div class="foto-zone" id="foto-zone" onclick="document.getElementById('foto-input').click()">
+        <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelect(this)"/>
+        <div id="foto-placeholder">📷 <span>Fotoğraf ekle (isteğe bağlı)</span></div>
+        <img id="foto-preview" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;"/>
+        <div id="foto-name" style="display:none;font-size:0.7rem;color:var(--green);margin-top:4px;font-weight:700;"></div>
+      </div>
+
       <button class="af-add" onclick="addAriza()">➕ Arıza Kaydı Ekle</button>
     </div>
     <div class="list-wrap" id="ariza-list-local"><div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div></div>
@@ -672,6 +688,38 @@ async function submitForm() {
 var arizaList=[];
 var arizaCounter=0;
 
+var fotoBase64 = null;
+var fotoMimeType = null;
+
+function onFotoSelect(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    fotoBase64 = e.target.result.split(',')[1];
+    fotoMimeType = file.type;
+    var preview = document.getElementById('foto-preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('foto-placeholder').style.display = 'none';
+    document.getElementById('foto-name').textContent = '✅ ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+    document.getElementById('foto-name').style.display = 'block';
+    document.getElementById('foto-zone').classList.add('has-foto');
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetFoto() {
+  fotoBase64 = null;
+  fotoMimeType = null;
+  document.getElementById('foto-input').value = '';
+  document.getElementById('foto-preview').style.display = 'none';
+  document.getElementById('foto-preview').src = '';
+  document.getElementById('foto-placeholder').style.display = 'block';
+  document.getElementById('foto-name').style.display = 'none';
+  document.getElementById('foto-zone').classList.remove('has-foto');
+}
+
 function addAriza(){
   var sinif=document.getElementById('a-sinif').value.trim();
   var bildiren=document.getElementById('a-bildiren').value.trim();
@@ -681,7 +729,7 @@ function addAriza(){
   if(!sinif||!aciklama||!oncelik||!tur){alert('Lütfen tüm alanları doldurunuz.');return;}
   var id=++arizaCounter;
   var now=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
-  arizaList.push({id,sinif,bildiren,oncelik,tur,aciklama,saat:now});
+  arizaList.push({id,sinif,bildiren,oncelik,tur,aciklama,saat:now,foto:fotoBase64,fotoMime:fotoMimeType});
   var em=document.getElementById('ariza-empty-local');
   if(em) em.style.display='none';
   var dc=oncelik==='yuksek'?'high':oncelik==='orta'?'mid':'low';
@@ -693,6 +741,7 @@ function addAriza(){
   ['a-sinif','a-bildiren','a-aciklama'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('a-oncelik').selectedIndex=0;
   document.getElementById('a-tur').selectedIndex=0;
+  resetFoto();
 }
 
 function delAriza(id){
