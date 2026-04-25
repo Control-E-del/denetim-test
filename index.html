@@ -756,17 +756,40 @@ async function submitAriza(){
   var now=new Date();
   var tarih=now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
   var saat=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
-  var payload={tarih,saat,kampus:'Antep Doğa Koleji',sekme:'Arıza Kayıtları',sorular:[],arizalar:arizaList};
+
   try{
+    // Fotoğrafsız liste gönder
+    var arizalarTemiz = arizaList.map(function(a){
+      return {id:a.id,sinif:a.sinif,bildiren:a.bildiren,oncelik:a.oncelik,tur:a.tur,aciklama:a.aciklama,saat:a.saat};
+    });
+    var payload={tarih:tarih,saat:saat,kampus:'Antep Doga Koleji',sekme:'Ariza Kayitlari',sorular:[],arizalar:arizalarTemiz};
     var encoded = encodeURIComponent(JSON.stringify(payload));
     await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
+
+    // Fotoğraflı arızaları ayrı gönder
+    for (var i=0; i<arizaList.length; i++) {
+      var a = arizaList[i];
+      if (a.foto) {
+        var fotoPayload = {
+          tip: 'ariza_foto',
+          tarih: tarih, saat: a.saat||saat,
+          sinif: a.sinif, bildiren: a.bildiren,
+          tur: a.tur, aciklama: a.aciklama,
+          foto: a.foto, fotoMime: a.fotoMime
+        };
+        var form = new FormData();
+        form.append('data', JSON.stringify(fotoPayload));
+        await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:form});
+      }
+    }
+
     document.getElementById('modal-msg').textContent=arizaList.length+' arıza kaydı gönderildi.';
     document.getElementById('modal-score').innerHTML='<span>'+arizaList.length+'</span> Kayıt';
     document.getElementById('modal-ov').classList.add('show');
     arizaList=[];
     document.getElementById('ariza-list-local').innerHTML='<div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div>';
     veriCek();
-  }catch(e){alert('Bağlantı hatası!');}
+  }catch(e){alert('Baglanti hatasi: '+e.message);}
 }
 
 // ── VERİ ─────────────────────────────────────────────────────
