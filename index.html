@@ -650,8 +650,8 @@ async function submitForm() {
   });
   var payload={tarih,saat,kampus:'Antep Doğa Koleji',sekme,sorular,arizalar:[]};
   try {
-    var form=new FormData(); form.append('data',JSON.stringify(payload));
-    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:form});
+    var encoded = encodeURIComponent(JSON.stringify(payload));
+    await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
     var yes=sorular.filter(function(s){return s.cevap==='EVET';}).length;
     var pct=Math.round((yes/sorular.length)*100);
     document.getElementById('modal-msg').textContent=sekme+' formu kaydedildi.';
@@ -702,8 +702,8 @@ async function submitAriza(){
   var saat=now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
   var payload={tarih,saat,kampus:'Antep Doğa Koleji',sekme:'Arıza Kayıtları',sorular:[],arizalar:arizaList};
   try{
-    var form=new FormData(); form.append('data',JSON.stringify(payload));
-    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:form});
+    var encoded = encodeURIComponent(JSON.stringify(payload));
+    await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
     document.getElementById('modal-msg').textContent=arizaList.length+' arıza kaydı gönderildi.';
     document.getElementById('modal-score').innerHTML='<span>'+arizaList.length+'</span> Kayıt';
     document.getElementById('modal-ov').classList.add('show');
