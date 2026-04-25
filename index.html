@@ -372,6 +372,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
 </div>
 
 <script>
+const FOTO_URL = "https://script.google.com/macros/s/AKfycbzV6AkbVEoUyF30JuCPvlQJCwHY5KHk6JlPMGLzpzWJHWG7cP_mm7D0qAnJJrRH4Xw/exec";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFNR27T-q9rNlXtuTVlkwu2fgjhURKWKNaSe-sOi-Kw5MY920Dgx78hyZwQ7Yz4E-u/exec";
 
 // ── ŞİFRELER & ROL ───────────────────────────────────────────
@@ -859,7 +860,7 @@ async function submitAriza(){
           };
           var form = new FormData();
           form.append('data', JSON.stringify(fotoPayload));
-          await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:form});
+          await fetch(FOTO_URL, {method:'POST', mode:'no-cors', body:form});
         } catch(fe) {
           console.log('Foto hatasi:', fe);
         }
