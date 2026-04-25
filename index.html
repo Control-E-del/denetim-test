@@ -247,6 +247,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
       <div class="sec-hdr"><h3>❌ Bugünkü Sorunlar</h3></div>
       <div class="hayir-box" id="hayir-ozet"></div>
     </div>
+
+    <div id="performans-wrap" style="display:none;margin-bottom:16px;">
+      <div class="sec-hdr"><h3>📊 Bölüm Performansı</h3></div>
+      <div id="performans-list"></div>
+    </div>
     <div class="sec-hdr"><h3>🔨 Açık Arızalar</h3><a onclick="switchPanel('ariza')">Tümü →</a></div>
     <div class="list-wrap" id="son-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
   </div>
@@ -294,8 +299,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
     <div class="submit-wrap">
       <button class="btn-submit btn-ariza-submit" onclick="submitAriza()">📤 Arıza Kayıtlarını Gönder</button>
     </div>
-    <div class="sec-hdr"><h3>📋 Tüm Arıza Geçmişi</h3></div>
-    <div class="list-wrap" id="tum-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
+    <div id="ariza-gecmis-wrap" style="display:none;">
+      <div class="sec-hdr"><h3>📋 Tüm Arıza Geçmişi</h3></div>
+      <div class="list-wrap" id="tum-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
+    </div>
   </div>
 
   <!-- PROFİL -->
@@ -737,12 +744,35 @@ function kItem(k){
   return '<div class="k-item"><div class="k-ico">'+ico+'</div><div class="k-info"><div class="k-name">'+k.bolum+'</div><div class="k-time">'+k.tarih+' · '+k.saat+' · %'+kp+'</div></div>'+badge+'</div>';
 }
 
-function aItem(a){
+function aItem(a, showBtn) {
   var dc=a.oncelik==='yuksek'?'high':a.oncelik==='orta'?'mid':'low';
   var durum = a.durum||'Açık';
   var sc = durum==='Tamamlandı'?'kapali':durum==='Bekliyor'?'bekliyor':'';
   var oncelikYazi = a.oncelik==='yuksek'?'🔴 Acil':a.oncelik==='orta'?'🟡 Orta':'🟢 Düşük';
-  return '<div class="a-item"><div class="a-dot '+dc+'"></div><div class="a-info"><div class="a-title">'+a.tur+' — '+a.sinif+'</div><div class="a-desc">'+a.aciklama+'</div><div class="a-meta">'+a.tarih+' · '+(a.bildiren||'-')+' · '+oncelikYazi+'</div></div><div class="a-status '+sc+'">'+durum+'</div></div>';
+  var btnHtml = '';
+  if (showBtn && a.row && durum !== 'Tamamlandi') {
+    var rid = a.row;
+    btnHtml = '<div style="margin-top:6px;display:flex;gap:5px;">';
+    if (durum !== 'Bekliyor') {
+      btnHtml += '<button onclick="updateAriza(' + rid + ', 2)" style="font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:6px;border:none;background:#fef3c7;color:#b45309;cursor:pointer;">⏳ Bekliyor</button>';
+    }
+    btnHtml += '<button onclick="updateAriza(' + rid + ', 3)" style="font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:6px;border:none;background:#dcfce7;color:#16a34a;cursor:pointer;">✅ Tamamlandı</button>';
+    btnHtml += '</div>';
+  }
+  }
+  return '<div class="a-item"><div class="a-dot '+dc+'"></div><div class="a-info"><div class="a-title">'+a.tur+' — '+a.sinif+'</div><div class="a-desc">'+a.aciklama+'</div><div class="a-meta">'+a.tarih+' · '+(a.bildiren||'-')+' · '+oncelikYazi+'</div>'+btnHtml+'</div><div class="a-status '+sc+'">'+durum+'</div></div>';
+}
+
+async function updateAriza(row, code) {
+  var durum = code === 2 ? 'Bekliyor' : 'Tamamlandi';
+  var durumLabel = code === 2 ? 'Bekliyor' : 'Tamamlandı';
+  try {
+    var url = SCRIPT_URL + '?action=updateAriza&row=' + row + '&durum=' + encodeURIComponent(durumLabel);
+    await fetch(url, {method:'GET', mode:'no-cors'});
+    tumArizalar.forEach(function(a){ if(a.row===row) a.durum=durum; });
+    renderArizaPanel();
+    renderPano();
+  } catch(e) { alert('Güncelleme hatası!'); }
 }
 
 function renderPano(){
@@ -766,8 +796,54 @@ function renderPano(){
     hw.style.display='block';
     document.getElementById('hayir-ozet').innerHTML='<h4>❌ '+tumH.length+' Sorun</h4>'+tumH.map(function(h){return '<div class="h-item">• '+h.soru+(h.aciklama?'<div class="h-aciklama">→ '+h.aciklama+'</div>':'')+' </div>';}).join('');
   } else { hw.style.display='none'; }
-  var sa=tumArizalar.filter(function(a){return a.durum!=='Kapalı';}).slice(-3).reverse();
-  document.getElementById('son-arizalar').innerHTML=sa.length===0?'<div class="empty-wrap">✅ Açık arıza yok</div>':sa.map(aItem).join('');
+  var sa=tumArizalar.filter(function(a){return a.durum!=='Tamamlandı';}).slice(-3).reverse();
+  var canEdit = currentRole==='personel'||currentRole==='admin';
+  document.getElementById('son-arizalar').innerHTML=sa.length===0?'<div class="empty-wrap">✅ Açık arıza yok</div>':sa.map(function(a){ return aItem(a, canEdit); }).join('');
+
+  // Performans takibi
+  renderPerformans();
+}
+
+function renderPerformans() {
+  var pw = document.getElementById('performans-wrap');
+  var pl = document.getElementById('performans-list');
+  if (!pw || !pl) return;
+
+  if (tumKontroller.length === 0) { pw.style.display='none'; return; }
+  pw.style.display = 'block';
+
+  // Bölümlere göre grupla
+  var bolumler = {};
+  tumKontroller.forEach(function(k) {
+    var b = k.bolum || 'Diğer';
+    if (!bolumler[b]) bolumler[b] = {evet:0, hayir:0};
+    bolumler[b].evet += (k.evetSayisi||0);
+    bolumler[b].hayir += (k.hayirSayisi||0);
+  });
+
+  var icons = {'Ön Büro & Danışma':'🏢','On Buro ve Danisma':'🏢','Personel Denetimi':'👥','ÖN BÜRO':'🏢','DANIŞMA PERSONELİ':'🗂️','GÜVENLİK PERSONELİ':'🛡️','TEMİZLİK PERSONELİ':'🧹','TEKNİK PERSONEL':'🔧','BAHÇE PERSONELİ':'🌳'};
+
+  pl.innerHTML = Object.keys(bolumler).map(function(b) {
+    var d = bolumler[b];
+    var tot = d.evet + d.hayir;
+    var pct = tot>0 ? Math.round((d.evet/tot)*100) : 0;
+    var color = pct>=90?'#16a34a':pct>=70?'#d97706':'#dc2626';
+    var ico = icons[b] || '📋';
+    return '<div style="background:#fff;border:1px solid #d4e8df;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+      '<span>'+ico+'</span>' +
+      '<span style="font-size:0.8rem;font-weight:700;color:#1a2e25;flex:1;">'+b+'</span>' +
+      '<span style="font-size:0.82rem;font-weight:900;color:'+color+';">%'+pct+'</span>' +
+      '</div>' +
+      '<div style="height:6px;background:#f0f7f4;border-radius:999px;overflow:hidden;">' +
+      '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:999px;transition:width 0.5s;"></div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:4px;">' +
+      '<span style="font-size:0.65rem;color:#5a7a6a;">✅ '+d.evet+' Evet</span>' +
+      '<span style="font-size:0.65rem;color:#dc2626;">❌ '+d.hayir+' Hayır</span>' +
+      '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderKontroller(){
@@ -777,8 +853,13 @@ function renderKontroller(){
 }
 
 function renderArizaPanel(){
+  var canEdit = currentRole==='personel'||currentRole==='admin';
+  var gecmisWrap = document.getElementById('ariza-gecmis-wrap');
+  if (gecmisWrap) gecmisWrap.style.display = canEdit ? 'block' : 'none';
   var el=document.getElementById('tum-arizalar');
-  el.innerHTML=tumArizalar.length===0?'<div class="empty-wrap">✅ Arıza kaydı yok</div>':tumArizalar.slice().reverse().map(aItem).join('');
+  if (!el) return;
+  el.innerHTML=tumArizalar.length===0?'<div class="empty-wrap">✅ Arıza kaydı yok</div>':
+    tumArizalar.slice().reverse().map(function(a){ return aItem(a, canEdit); }).join('');
 }
 
 function yenile(){ veriCek(); }
