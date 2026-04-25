@@ -19,6 +19,55 @@
   --red:#dc2626; --red-light:#fef2f2;
   --shadow:0 1px 3px rgba(0,0,0,0.3);
 }
+/* Light Mode */
+body.light { --bg:#f5f7f5; --card:#ffffff; --card2:#f0f4f0; --border:#d4e0d4; --text:#1a2e1a; --muted:#5a7a5a; }
+body.light .topbar { background:#ffffff; border-bottom-color:#d4e0d4; }
+body.light .bottom-nav { background:#ffffff; border-top-color:#d4e0d4; }
+body.light .scroll-area { background:#f5f7f5; }
+body.light .stat-card { background:#ffffff; border-color:#d4e0d4; }
+body.light .k-item, body.light .a-item { background:#ffffff; border-color:#d4e0d4; }
+body.light .q-section { background:#ffffff; border-color:#d4e0d4; }
+body.light .q-sec-hdr { background:#f0f4f0; border-bottom-color:#d4e0d4; }
+body.light .q-row { border-bottom-color:#e8f0e8; color:#1a2e1a; }
+body.light .q-row:hover { background:#f0f4f0; }
+body.light .q-text { color:#1a2e1a; }
+body.light .q-num { color:#5a7a5a; }
+body.light .btn-e, body.light .btn-h { border-color:#d4e0d4; color:#5a7a5a; background:#ffffff; }
+body.light .reason-wrap { background:#fff5f5; border-bottom-color:#ffd4d4; }
+body.light .reason-ta { background:#ffffff; border-color:#ffaaaa; color:#1a2e1a; }
+body.light .prog-wrap { background:#ffffff; border-color:#d4e0d4; }
+body.light .prog-bg { background:#f0f4f0; }
+body.light .form-tabs { background:#f0f4f0; border-color:#d4e0d4; }
+body.light .form-tab { color:#5a7a5a; }
+body.light .form-tab.active { background:#ffffff; color:#1a2e1a; }
+body.light .ariza-form { background:#ffffff; border-color:#d4e0d4; }
+body.light .af-input, body.light .af-select, body.light .af-ta { background:#f5f7f5; border-color:#d4e0d4; color:#1a2e1a; }
+body.light .af-input::placeholder, body.light .af-ta::placeholder { color:#5a7a5a; }
+body.light .af-select option { background:#ffffff; }
+body.light .modal { background:#ffffff; border-color:#16a34a; }
+body.light .modal p { color:#5a7a5a; }
+body.light .modal-score { color:#1a2e1a; }
+body.light .pass-box { background:#ffffff; border-color:#2563eb; }
+body.light .pass-box p { color:#5a7a5a; }
+body.light .pass-inp { background:#f5f7f5; border-color:#d4e0d4; color:#1a2e1a; }
+body.light .prof-card { background:#ffffff; border-color:#d4e0d4; }
+body.light .greeting h2 { color:#1a2e1a; }
+body.light .greeting p { color:#5a7a5a; }
+body.light .sec-hdr h3 { color:#1a2e1a; }
+body.light .k-name { color:#1a2e1a; }
+body.light .k-time { color:#5a7a5a; }
+body.light .a-title { color:#1a2e1a; }
+body.light .a-desc { color:#5a7a5a; }
+body.light .a-meta { color:#5a7a5a; }
+body.light .nav-label { color:#5a7a5a; }
+body.light .q-sec-score { background:#f5f7f5; }
+body.light .hayir-box { background:#fff5f5; border-color:#ffd4d4; }
+body.light .h-item { color:#1a2e1a; border-bottom-color:#ffd4d4; }
+body.light .refresh-btn { background:#f0f4f0; border-color:#d4e0d4; }
+body.light .topbar-btn { background:#f0f4f0; border-color:#d4e0d4; }
+body.light .topbar-title { color:#1a2e1a; }
+body.light .topbar-sub { color:#5a7a5a; }
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:#0a1628;}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a1628;color:#e8f4fd;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
@@ -193,7 +242,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a1628;color:#e8f4fd
       <div class="topbar-sub">DOĞA KOLEJİ · ANTEP</div>
     </div>
   </div>
-  <div class="topbar-btn" onclick="yenile()">🔄</div>
+  <div style="display:flex;gap:6px;">
+    <div class="topbar-btn" id="theme-btn" onclick="toggleTheme()" title="Tema">☀️</div>
+    <div class="topbar-btn" onclick="yenile()">🔄</div>
+  </div>
 </div>
 
 <div class="scroll-area" id="scroll-area">
@@ -746,6 +798,23 @@ function playAlertSound(){
 }
 
 function yenile(){ veriCek(); }
+
+function toggleTheme() {
+  var isLight = document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙' : '☀️';
+  try { localStorage.setItem('eduTheme', isLight ? 'light' : 'dark'); } catch(e){}
+}
+
+// Kayıtlı temayı yükle
+try {
+  if (localStorage.getItem('eduTheme') === 'light') {
+    document.body.classList.add('light');
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = '🌙';
+    });
+  }
+} catch(e){}
 
 veriCek();
 </script>
