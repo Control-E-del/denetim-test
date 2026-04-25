@@ -766,20 +766,24 @@ async function submitAriza(){
     var encoded = encodeURIComponent(JSON.stringify(payload));
     await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
 
-    // Fotoğraflı arızaları ayrı gönder
+    // Fotoğraflı arızaları ayrı gönder - direkt Drive'a
     for (var i=0; i<arizaList.length; i++) {
       var a = arizaList[i];
       if (a.foto) {
-        var fotoPayload = {
-          tip: 'ariza_foto',
-          tarih: tarih, saat: a.saat||saat,
-          sinif: a.sinif, bildiren: a.bildiren,
-          tur: a.tur, aciklama: a.aciklama,
-          foto: a.foto, fotoMime: a.fotoMime
-        };
-        var form = new FormData();
-        form.append('data', JSON.stringify(fotoPayload));
-        await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:form});
+        try {
+          var fotoPayload = {
+            tip: 'ariza_foto',
+            tarih: tarih, saat: a.saat||saat,
+            sinif: a.sinif, bildiren: a.bildiren,
+            tur: a.tur, aciklama: a.aciklama,
+            foto: a.foto, fotoMime: a.fotoMime || 'image/jpeg'
+          };
+          var form = new FormData();
+          form.append('data', JSON.stringify(fotoPayload));
+          await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:form});
+        } catch(fe) {
+          console.log('Foto hatasi:', fe);
+        }
       }
     }
 
