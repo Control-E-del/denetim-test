@@ -759,7 +759,6 @@ function aItem(a, showBtn) {
     btnHtml += '<button onclick="updateAriza(' + rid + ', 3)" style="font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:6px;border:none;background:#dcfce7;color:#16a34a;cursor:pointer;">✅ Tamamlandı</button>';
     btnHtml += '</div>';
   }
-  }
   return '<div class="a-item"><div class="a-dot '+dc+'"></div><div class="a-info"><div class="a-title">'+a.tur+' — '+a.sinif+'</div><div class="a-desc">'+a.aciklama+'</div><div class="a-meta">'+a.tarih+' · '+(a.bildiren||'-')+' · '+oncelikYazi+'</div>'+btnHtml+'</div><div class="a-status '+sc+'">'+durum+'</div></div>';
 }
 
