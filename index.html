@@ -305,16 +305,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f7f4;color:#1a2e25
       <div class="foto-zone" id="foto-zone" onclick="document.getElementById('foto-input').click()">
         <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelect(this)"/>
         <div id="foto-placeholder">📷 <span>Fotoğraf ekle (isteğe bağlı)</span></div>
-        <img id="foto-preview" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;"/>
+        <img id="foto-preview" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;"/>
         <div id="foto-name" style="display:none;font-size:0.7rem;color:var(--green);margin-top:4px;font-weight:700;"></div>
       </div>
 
-      <button class="af-add" onclick="addAriza()">➕ Arıza Kaydı Ekle</button>
+      <button class="af-add" id="btn-ariza-gonder" onclick="gonderAriza()" style="width:100%;padding:12px;font-size:0.9rem;">📤 Arıza Kaydını Gönder</button>
     </div>
-    <div class="list-wrap" id="ariza-list-local"><div class="empty-wrap" id="ariza-empty-local">Henüz arıza eklenmedi.</div></div>
-    <div class="submit-wrap">
-      <button class="btn-submit btn-ariza-submit" onclick="submitAriza()">📤 Arıza Kayıtlarını Gönder</button>
-    </div>
+
     <div id="ariza-gecmis-wrap" style="display:none;">
       <div class="sec-hdr"><h3>📋 Tüm Arıza Geçmişi</h3></div>
       <div class="list-wrap" id="tum-arizalar"><div class="loading-wrap"><div class="spinner"></div></div></div>
@@ -690,6 +687,88 @@ var arizaCounter=0;
 
 var fotoBase64 = null;
 var fotoMimeType = null;
+
+// Fotoğrafı 400px max, %50 kaliteye düşür - URL'ye sığsın
+function kucultFoto(base64, mime) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var max = 400;
+      var w = img.width, h = img.height;
+      if (w > h) { if(w>max){h=Math.round(h*max/w);w=max;} }
+      else { if(h>max){w=Math.round(w*max/h);h=max;} }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(canvas.toDataURL('image/jpeg',0.5).split(',')[1]);
+    };
+    img.src = 'data:'+(mime||'image/jpeg')+';base64,'+base64;
+  });
+}
+
+async function gonderAriza() {
+  var sinif    = document.getElementById('a-sinif').value.trim();
+  var bildiren = document.getElementById('a-bildiren').value.trim();
+  var oncelik  = document.getElementById('a-oncelik').value;
+  var tur      = document.getElementById('a-tur').value;
+  var aciklama = document.getElementById('a-aciklama').value.trim();
+
+  if (!sinif || !tur || !oncelik || !aciklama) {
+    alert('Lutfen tum alanlari doldurunuz.');
+    return;
+  }
+
+  var btn = document.getElementById('btn-ariza-gonder');
+  btn.disabled = true;
+  btn.textContent = '⏳ Gonderiliyor...';
+
+  var now = new Date();
+  var tarih = now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var saat  = now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+
+  try {
+    if (fotoBase64) {
+      // Fotoğrafı küçült sonra GET ile gönder
+      var kucuk = await kucultFoto(fotoBase64, fotoMimeType);
+      var payload = {
+        tip: 'ariza_foto',
+        tarih: tarih, saat: saat,
+        sinif: sinif, bildiren: bildiren,
+        tur: tur, aciklama: aciklama,
+        oncelik: oncelik,
+        foto: kucuk, fotoMime: 'image/jpeg'
+      };
+      var encoded = encodeURIComponent(JSON.stringify(payload));
+      await fetch(SCRIPT_URL+'?data='+encoded, {method:'GET', mode:'no-cors'});
+    } else {
+      // Fotoğrafsız - GET ile gönder
+      var payload2 = {
+        tarih:tarih, saat:saat, kampus:'Antep Doga Koleji',
+        sekme:'Ariza Kayitlari', sorular:[],
+        arizalar:[{sinif:sinif,bildiren:bildiren,oncelik:oncelik,tur:tur,aciklama:aciklama,saat:saat}]
+      };
+      var encoded2 = encodeURIComponent(JSON.stringify(payload2));
+      await fetch(SCRIPT_URL+'?data='+encoded2, {method:'GET', mode:'no-cors'});
+    }
+
+    // Formu sıfırla
+    ['a-sinif','a-bildiren','a-aciklama'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('a-oncelik').selectedIndex=0;
+    document.getElementById('a-tur').selectedIndex=0;
+    resetFoto();
+
+    document.getElementById('modal-msg').textContent = 'Ariza kaydi basariyla gonderildi!';
+    document.getElementById('modal-score').innerHTML = '<span>✅</span>';
+    document.getElementById('modal-ov').classList.add('show');
+    setTimeout(function(){ veriCek(); }, 2000);
+
+  } catch(e) {
+    alert('Baglanti hatasi!');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📤 Arıza Kaydını Gönder';
+}
 
 function onFotoSelect(input) {
   var file = input.files[0];
